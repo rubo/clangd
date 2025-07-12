@@ -29,7 +29,9 @@ jobs:
           }
 
       - name: Set up komac
-        run: winget install komac --accept-source-agreements
+        run: |
+          winget install komac --accept-source-agreements
+          $env:PATH = "$env:ProgramFiles/Komac;$env:PATH"
 
       - name: Submit package
         env:
@@ -41,8 +43,8 @@ jobs:
           echo $releaseUrl
           echo $version
           #komac sync-fork
-          "$env:ProgramFiles/Komac/komac" update -v $version -u $releaseUrl --dry-run -o winget-pkgs
+          komac update -v $version -u $releaseUrl --dry-run -o winget-pkgs
           $installerPath = "winget-pkgs/manifests/l/LLVM/clangd/$version/LLVM.clangd.installer.yaml"
           (Get-Content $installerPath) -replace '^(\s*-\s+RelativeFilePath:\s+).*$', ('${1}clang_' + $version + '/bin/clangd.exe') |
             Set-Content $installerPath
-          "$env:ProgramFiles/Komac/komac" submit winget-pkgs -y --dry-run
+          komac submit winget-pkgs -y --dry-run
