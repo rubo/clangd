@@ -35,6 +35,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
         run: |
+          where komac
           $releaseInfo = curl -sL ${{ steps.params.outputs.assets_url }} | ConvertFrom-Json
           $releaseUrl = $releaseInfo | Where-Object -Property name -like 'clangd-windows-*.zip' | Select -ExpandProperty browser_download_url
           $version = ${{ steps.params.outputs.version }}
