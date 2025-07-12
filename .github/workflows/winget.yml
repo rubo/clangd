@@ -29,7 +29,11 @@ jobs:
           }
 
       - name: Set up komac
-        run: winget install komac --accept-source-agreements -h
+        run: |
+          $releaseUrl = "https://api.github.com/repos/russellbanks/Komac/releases/latest"
+          $downloadUrl = curl -sL $releaseUrl | ConvertFrom-Json | Select -ExpandProperty assets_url |
+            Where-Object -Property name -like 'komac-*-x86_64-pc-windows-msvc.exe' | Select -ExpandProperty browser_download_url
+          curl -sL $downloadUrl -o komac.exe
 
       - name: Submit package
         env:
@@ -41,9 +45,9 @@ jobs:
           $version = ${{ steps.params.outputs.version }}
           echo $releaseUrl
           echo $version
-          #komac sync-fork
-          komac update -v $version -u $releaseUrl --dry-run -o winget-pkgs
+          #./komac sync-fork
+          ./komac update -v $version -u $releaseUrl --dry-run -o winget-pkgs
           $installerPath = "winget-pkgs/manifests/l/LLVM/clangd/$version/LLVM.clangd.installer.yaml"
           (Get-Content $installerPath) -replace '^(\s*-\s+RelativeFilePath:\s+).*$', ('${1}clang_' + $version + '/bin/clangd.exe') |
             Set-Content $installerPath
-          komac submit winget-pkgs -y --dry-run
+          ./komac submit winget-pkgs -y --dry-run
