@@ -53,4 +53,4 @@ jobs:
           (Get-Content $installerPath) -replace '^(\s*-\s+RelativeFilePath:\s+).*$', ('${1}' + "clang_$version/bin/clangd.exe") |
             Set-Content $installerPath
           
-          ./komac submit winget-pkgs -y --dry-run
+          ./komac submit -y --dry-run winget-pkgs
