@@ -24,8 +24,8 @@ jobs:
           } else {
             $releaseUrl = "https://api.github.com/repos/clangd/clangd/releases/tags/${{ github.event.inputs.tag_name }}"
             $assetsUrl = curl -sL $releaseUrl | ConvertFrom-Json | Select -ExpandProperty assets_url
-            echo "assets_url=$assetsUrl" >> $env:GITHUB_ENV
-            echo "version=${{ github.event.inputs.tag_name }}" >> $env:GITHUB_ENV
+            echo "assets_url=$assetsUrl" >> $env:GITHUB_OUTPUT
+            echo "version=${{ github.event.inputs.tag_name }}" >> $env:GITHUB_OUTPUT
           }
 
       - name: Submit package
