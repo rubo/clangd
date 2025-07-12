@@ -1,0 +1,40 @@
+name: Publish on Windows Package Manager
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Release tag (version)
+        required: true
+
+jobs:
+  publish-winget:
+    name: Publish
+    runs-on: windows-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'release' && !github.event.release.prerelease
+    steps:
+      - name: Configure parameters
+        id: params
+        run: |
+          if ("${{ github.event_name }}" -eq "release") {
+            echo "assets_url=${{ github.event.release.assets_url }}" >> $env:GITHUB_ENV
+            echo "version=${{ github.event.release.tag_name }}" >> $env:GITHUB_ENV
+          } else {
+            $releaseUrl = "https://api.github.com/repos/clangd/clangd/releases/tags/${{ github.event.inputs.tag_name }}"
+            $assetsUrl = curl -sL $releaseUrl | ConvertFrom-Json | Select -ExpandProperty assets_url
+            echo "assets_url=$assetsUrl" >> $env:GITHUB_ENV
+            echo "version=${{ github.event.inputs.tag_name }}" >> $env:GITHUB_ENV
+          }
+
+      - name: Submit package
+        env:
+          WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: |
+          $releaseInfo = curl -sL ${{ steps.params.outputs.assets_url }} | ConvertFrom-Json
+          $releaseUrl = $releaseInfo | Where-Object -Property name -like 'clangd-windows-*.zip' | Select -ExpandProperty browser_download_url
+          echo $releaseUrl
+          echo ${{ steps.params.outputs.version }}
+          #curl -sL https://aka.ms/wingetcreate/latest -o wingetcreate.exe
+          #./wingetcreate update LLVM.clangd -s -v ${{ steps.params.outputs.version }} -u $releaseUrl
