@@ -30,7 +30,7 @@ jobs:
 
       - name: Set up komac
         run: |
-          winget install komac --accept-source-agreements
+          winget install komac --accept-source-agreements --verbose
           $env:PATH = "$env:ProgramFiles/Komac;$env:PATH"
           ls $env:ProgramFiles/Komac
 
