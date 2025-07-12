@@ -28,13 +28,21 @@ jobs:
             echo "version=${{ github.event.inputs.tag_name }}" >> $env:GITHUB_OUTPUT
           }
 
+      - name: Set up komac
+        run: winget install komac
+
       - name: Submit package
         env:
-          WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
         run: |
           $releaseInfo = curl -sL ${{ steps.params.outputs.assets_url }} | ConvertFrom-Json
           $releaseUrl = $releaseInfo | Where-Object -Property name -like 'clangd-windows-*.zip' | Select -ExpandProperty browser_download_url
+          $version = ${{ steps.params.outputs.version }}
           echo $releaseUrl
-          echo ${{ steps.params.outputs.version }}
-          #curl -sL https://aka.ms/wingetcreate/latest -o wingetcreate.exe
-          #./wingetcreate update LLVM.clangd -s -v ${{ steps.params.outputs.version }} -u $releaseUrl
+          echo $version
+          #komac sync-fork
+          komac update -v $version -u $releaseUrl --dry-run -o winget-pkgs
+          $installerPath = "winget-pkgs/manifests/l/LLVM/clangd/$version/LLVM.clangd.installer.yaml"
+          (Get-Content $installerPath) -replace '^(\s*-\s+RelativeFilePath:\s+).*$', ('${1}clang_' + $version + '/bin/clangd.exe') |
+            Set-Content $installerPath
+          komac submit winget-pkgs -y --dry-run
