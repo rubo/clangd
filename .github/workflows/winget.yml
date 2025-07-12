@@ -12,7 +12,7 @@ on:
 jobs:
   publish-winget:
     name: Publish
-    runs-on: windows-latest
+    runs-on: windows-2025
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'release' && !github.event.release.prerelease
     steps:
       - name: Configure parameters
