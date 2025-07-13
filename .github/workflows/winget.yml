@@ -30,13 +30,7 @@ jobs:
 
       - name: Set up Komac
         run: |
-          $releaseUrl = "$env:GITHUB_API_URL/repos/russellbanks/Komac/releases/latest"
-          $downloadUrl = curl -sL $releaseUrl | ConvertFrom-Json
-            | Select-Object -ExpandProperty assets
-            | Where-Object -Property name -like "komac-*-x86_64-pc-windows-msvc.exe"
-            | Select-Object -ExpandProperty browser_download_url
-            | Select-Object -First 1
-          curl -sL $downloadUrl -o komac.exe
+          cargo binstall komac
           ./komac --version
 
       - name: Submit package
