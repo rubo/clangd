@@ -30,9 +30,14 @@ jobs:
 
       - name: Set up Komac
         run: |
-          Set-ExecutionPolicy Unrestricted -Scope Process; iex (iwr "https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.ps1").Content
-          cargo binstall komac
-          komac --version
+          $releaseUrl = "$env:GITHUB_API_URL/repos/russellbanks/Komac/releases/latest"
+          $downloadUrl = curl -sL $releaseUrl | ConvertFrom-Json
+            | Select-Object -ExpandProperty assets
+            | Where-Object -Property name -like "komac-*-x86_64-pc-windows-msvc.exe"
+            | Select-Object -ExpandProperty browser_download_url
+            | Select-Object -First 1
+          curl -sL $downloadUrl -o komac.exe
+          ./komac --version
 
       - name: Submit package
         env:
@@ -50,4 +55,4 @@ jobs:
           (Get-Content $installerPath) -replace '^(\s*-\s+RelativeFilePath:\s+).*$', ('${1}' + "clang_$version/bin/clangd.exe")
             | Set-Content $installerPath
           
-          ./komac submit -y --dry-run winget-pkgs
+          ./komac submit -y winget-pkgs
