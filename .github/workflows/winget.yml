@@ -43,6 +43,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
         run: |
+          echo ${{ toJson(github.event.release) }}
           $releaseUrl = curl -sL ${{ steps.params.outputs.assets_url }} | ConvertFrom-Json
             | Where-Object -Property name -like "clangd-windows-*.zip"
             | Select-Object -ExpandProperty browser_download_url
