@@ -28,7 +28,7 @@ jobs:
             echo "version=${{ github.event.inputs.tag_name }}" >> $env:GITHUB_OUTPUT
           }
 
-          echo ${{ toJson(github.event.release) }}
+          Write-Output "${{ toJson(github.event.release) }}"
 
       - name: Set up Komac
         run: |
