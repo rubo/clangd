@@ -28,8 +28,6 @@ jobs:
             echo "version=${{ github.event.inputs.tag_name }}" >> $env:GITHUB_OUTPUT
           }
 
-          Write-Output "${{ toJson(github.event.release) }}"
-
       - name: Set up Komac
         run: |
           $releaseUrl = "$env:GITHUB_API_URL/repos/russellbanks/Komac/releases/latest"
