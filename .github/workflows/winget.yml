@@ -28,24 +28,25 @@ jobs:
             echo "version=${{ github.event.inputs.tag_name }}" >> $env:GITHUB_OUTPUT
           }
 
-      - name: Set up Komac
+      - name: Set up Windows Package Manager Manifest Creator
         run: |
-          $releaseUrl = "$env:GITHUB_API_URL/repos/russellbanks/Komac/releases/latest"
-          $downloadUrl = curl -sL $releaseUrl | ConvertFrom-Json
-            | Select-Object -ExpandProperty assets
-            | Where-Object -Property name -like "komac-*-x86_64-pc-windows-msvc.exe"
-            | Select-Object -ExpandProperty browser_download_url
-            | Select-Object -First 1
-          curl -sL $downloadUrl -o komac.exe
-          ./komac --version
+          curl -sL https://aka.ms/wingetcreate/latest -o wingetcreate.exe
+          ./wingetcreate info
 
       - name: Submit package
         env:
-          GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
+          WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
         run: |
           $releaseUrl = curl -sL ${{ steps.params.outputs.assets_url }} | ConvertFrom-Json
             | Where-Object -Property name -like "clangd-windows-*.zip"
             | Select-Object -ExpandProperty browser_download_url
           
-          ./komac sync-fork
-          ./komac update -v ${{ steps.params.outputs.version }} -u $releaseUrl -s LLVM.clangd
+          ./wingetcreate update LLVM.clangd -v ${{ steps.params.outputs.version }} -u $releaseUrl -o winget-pkgs
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifest
+          path: winget-pkgs
+          retention-days: 1
+          if-no-files-found: error
