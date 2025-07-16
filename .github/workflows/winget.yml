@@ -46,7 +46,6 @@ jobs:
           $releaseUrl = curl -sL ${{ steps.params.outputs.assets_url }} | ConvertFrom-Json
             | Where-Object -Property name -like "clangd-windows-*.zip"
             | Select-Object -ExpandProperty browser_download_url
-          $version = "${{ steps.params.outputs.version }}"
           
           ./komac sync-fork
-          ./komac update -v $version -u $releaseUrl --dry-run LLVM.clangd
+          ./komac update -v ${{ steps.params.outputs.version }} -u $releaseUrl --dry-run LLVM.clangd
